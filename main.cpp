@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include "osinfo.h"
+#include "fileExplorer.h"
 
 #define HKEY_PATH "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
@@ -30,6 +31,10 @@ int main() {
       info.dwPlatformId,
       "",
       ID);
+
+  struct fileExplorer::s_folder folder;
+  fileExplorer::getContent(&folder, (char *)"C:\\");
+  fileExplorer::print(&folder);
 
   return 0;
 }
