@@ -1,6 +1,5 @@
 #ifndef H_OSINFO
 #define H_OSINFO
-#include <windows.h>
 
 // FIX this
 BOOL is64bits() {
@@ -21,7 +20,7 @@ void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
       case 3:
       case 2:
         if (info -> wProductType == VER_NT_WORKSTATION){
-          sprintf(tag, "8%d (%d.%d) %s",
+          sprintf(tag, "8%s (%d.%d) %s",
               info -> dwMinorVersion == 3 ? ".1" : "",
               info -> dwMajorVersion,
               info -> dwMinorVersion,
@@ -36,7 +35,7 @@ void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
       case 1:
       case 0:
         if (info -> wProductType == VER_NT_WORKSTATION){
-          sprintf(tag, "%d (%d.%d) %s",
+          sprintf(tag, "%s (%d.%d) %s",
               info -> dwMinorVersion == 1 ? "7" : "Vista",
               info -> dwMajorVersion,
               info -> dwMinorVersion,
@@ -54,7 +53,6 @@ void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
       case 2:
         if (info -> wProductType == VER_NT_WORKSTATION){
           sprintf(tag, "XP Professional x64 (%d.%d) %s",
-              info -> dwMinorVersion == 3 ? ".1" : "",
               info -> dwMajorVersion,
               info -> dwMinorVersion,
               is64bits() ? "64bits" : "32bits");
@@ -66,7 +64,7 @@ void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
         break;
       case 1:
       case 0:
-        sprintf(tag, "%d (%d.%d) %s",
+        sprintf(tag, "%s (%d.%d) %s",
             info -> dwMinorVersion == 1 ? "XP" : "2000",
             info -> dwMajorVersion,
             info -> dwMinorVersion,

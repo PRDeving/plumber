@@ -1,8 +1,5 @@
 #ifndef H_FILEEXPLORER
 #define H_FILEEXPLORER
-#include <windows.h>
-#include <tchar.h>
-#include <stdio.h>
 
 namespace fileExplorer {
 
@@ -27,8 +24,6 @@ namespace fileExplorer {
 
     HANDLE hFind;
     WIN32_FIND_DATA data;
-    if (folder -> cfolders > 0) free(folder -> folders);
-    if (folder -> cfiles > 0) free(folder -> files);
 
     folder -> cfolders = 0;
     folder -> cfiles = 0;
