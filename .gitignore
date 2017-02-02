@@ -1,0 +1,4 @@
+*.exe
+*.obj
+*.ld
+node_modules
