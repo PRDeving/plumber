@@ -3,8 +3,14 @@
 
 #define ADDRESS "127.0.0.1"
 #define PORT 1337
+#define BUFFER_LENGTH 1024
 
 namespace net {
+
+  typedef struct {
+    unsigned int uid;
+    char * data;
+  } PACKET;
 
   int createSocket(SOCKET * s) {
     WSADATA WSAData;
@@ -38,23 +44,71 @@ namespace net {
       WSACleanup();
       *s = INVALID_SOCKET;
       return 1;
-    } else {
-      printf("connected\n");
     }
 
+    printf("connected\n");
     return 0;
   }
 
-  int write(SOCKET * s, char *msg) {
+  PACKET * newPacket(char * data) {
+    PACKET * pck = (PACKET *) malloc(sizeof(PACKET));
+    pck -> uid = G_UID;
+    pck -> data = data;
+    return pck;
+  }
+
+  char * serialize(PACKET * pck) {
+    char *data = (char*) malloc(sizeof(unsigned int) + (sizeof(char) * (strlen(pck -> data) + 5)));
+    sprintf(data, "%d~~%s/0\0", pck -> uid, pck -> data);
+    return data;
+  }
+
+  int write(SOCKET * s, PACKET * pck) {
+    char * msg = serialize(pck);
+    printf("send: %s\n", msg);
     if(send(*s , msg , strlen(msg) , 0) < 0) {
+      free(msg);
       return 1;
     }
+    free(msg);
     return 0;
   }
 
   void close(SOCKET * s) {
     closesocket(*s);
     WSACleanup();
+  }
+
+  void listen(SOCKET * s, char * buf, int * buffc) {
+    BOOL listening = TRUE;
+    do {
+      int bc = 0;
+      char buff[BUFFER_LENGTH];
+      bc = recv(*s, buff, BUFFER_LENGTH, 0);
+      if (bc > 0 ) {
+        printf("Bytes received: %d  _  %s\n", bc, buff);
+        if (strcmp(buff, "close") == 0) {
+          listening = FALSE;
+        }
+      } else if ( bc == 0 ) {
+        printf("Connection closed\n");
+      } else {
+        printf("peer disconnected: %d\n", WSAGetLastError());
+        close(s);
+        listening = FALSE;
+      }
+    } while(listening);
+  }
+
+  void test() {
+    SOCKET sock;
+    createSocket(&sock);
+    if(connect(&sock) == 0) {
+      PACKET * pck = newPacket((char*)"testing la vida locah!");
+      write(&sock, pck);
+      free(pck);
+    }
+    close(&sock);
   }
 }
 

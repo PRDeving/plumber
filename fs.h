@@ -63,15 +63,12 @@ namespace fs {
       c++;
     } while (c < folder -> cfiles);
   }
+
+  void test() {
+    struct s_folder folder;
+    ls(&folder, (char *)"C:\\");
+    print(&folder);
+  }
 }
-
-
-  // hFind = FindFirstFile("c:\\*.*", &data);
-  // if (hFind != INVALID_HANDLE_VALUE) {
-  //   do {
-  //     printf("%s\n", data.cFileName);
-  //   } while (FindNextFile(hFind, &data));
-  //   FindClose(hFind);
-  // }
 
 #endif

