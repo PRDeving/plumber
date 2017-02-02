@@ -8,5 +8,9 @@
     "start": "node server.js"
   },
   "author": "PRDeving",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.1",
+    "socket.io": "^1.7.2"
+  }
 }
