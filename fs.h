@@ -1,7 +1,7 @@
 #ifndef H_FILEEXPLORER
 #define H_FILEEXPLORER
 
-namespace fileExplorer {
+namespace fs {
 
   struct s_file {
     TCHAR name[128];
@@ -18,7 +18,7 @@ namespace fileExplorer {
     struct s_file * files;
   };
 
-  void getContent(struct s_folder * folder, char * path) {
+  void ls(struct s_folder * folder, char * path) {
     char fpath[MAX_PATH];
     sprintf(fpath, "%s*.*", path);
 

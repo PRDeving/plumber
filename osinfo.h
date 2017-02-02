@@ -1,10 +1,25 @@
 #ifndef H_OSINFO
 #define H_OSINFO
 
-// FIX this
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 BOOL is64bits() {
-  return true;
+    LPFN_ISWOW64PROCESS fnIsWow64Process;
+    BOOL bIsWow64 = FALSE;
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+
+    if(NULL != fnIsWow64Process) {
+        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64)) {
+            //handle error
+        }
+    }
+    return bIsWow64;
 }
+
+// FIX this
+// BOOL is64bits() {
+//   return true;
+// }
 
 void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
   TCHAR tag[128];
