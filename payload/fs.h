@@ -21,6 +21,7 @@ namespace fs {
   void ls(struct s_folder * folder, char * path) {
     char fpath[MAX_PATH];
     sprintf(fpath, "%s*.*", path);
+    printf("ls in %s", fpath);
 
     HANDLE hFind;
     WIN32_FIND_DATA data;
@@ -62,6 +63,27 @@ namespace fs {
       printf("%s\n", folder -> files[c].name);
       c++;
     } while (c < folder -> cfiles);
+  }
+
+  char* serialize(struct s_folder * folder) {
+    char *bf = (char*)malloc(sizeof(char) * 10240);
+    sprintf(bf, "[");
+    int c = 0;
+
+    char i[64];
+    do {
+      sprintf(i, "\"./%s\",", folder -> folders[c].name);
+      strcat(bf, i);
+      c++;
+    } while (c < folder -> cfolders);
+    c = 0;
+    do {
+      sprintf(i, "\"%s\",", folder -> files[c].name);
+      strcat(bf, i);
+      c++;
+    } while (c < folder -> cfiles);
+    strcat(bf, "0]");
+    return bf;
   }
 
   void test() {
