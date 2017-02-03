@@ -1,16 +1,9 @@
 #ifndef H_SOCKET
 #define H_SOCKET
 
-#define ADDRESS "127.0.0.1"
-#define PORT 1337
 #define BUFFER_LENGTH 1024
 
 namespace net {
-
-  typedef struct {
-    unsigned int uid;
-    char * data;
-  } PACKET;
 
   int createSocket(SOCKET * s) {
     WSADATA WSAData;
@@ -50,23 +43,10 @@ namespace net {
     return 0;
   }
 
-  PACKET * newPacket(char * data) {
-    PACKET * pck = (PACKET *) malloc(sizeof(PACKET));
-    pck -> uid = G_UID;
-    pck -> data = data;
-    return pck;
-  }
-
-  char * serialize(PACKET * pck) {
-    char *data = (char*) malloc(sizeof(unsigned int) + (sizeof(char) * (strlen(pck -> data) + 5)));
-    sprintf(data, "%d~~%s/0\0", pck -> uid, pck -> data);
-    return data;
-  }
-
-  int write(SOCKET * s, PACKET * pck) {
-    char * msg = serialize(pck);
-    printf("send: %s\n", msg);
-    if(send(*s , msg , strlen(msg) , 0) < 0) {
+  int write(SOCKET *s, char *msg) {
+    char buffer[1024];
+    sprintf(buffer, "%d~~%s||", G_UID, msg);
+    if(send(*s, buffer, strlen(buffer), 0) < 0) {
       return 1;
     }
     return 0;
@@ -99,9 +79,7 @@ namespace net {
     SOCKET sock;
     createSocket(&sock);
     if(connect(&sock) == 0) {
-      PACKET * pck = newPacket((char*)"testing la vida locah!");
-      write(&sock, pck);
-      free(pck);
+      // TODO smthng here
     }
     closesocket(sock);
     close();
