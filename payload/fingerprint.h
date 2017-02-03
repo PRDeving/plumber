@@ -18,11 +18,6 @@ namespace fingerprint {
     return bIsWow64;
   }
 
-  // FIX this
-  // BOOL is64bits() {
-  //   return true;
-  // }
-
   void reconOS(TCHAR *ID, OSVERSIONINFOEX * info) {
     TCHAR tag[128];
 
