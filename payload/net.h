@@ -67,10 +67,8 @@ namespace net {
     char * msg = serialize(pck);
     printf("send: %s\n", msg);
     if(send(*s , msg , strlen(msg) , 0) < 0) {
-      free(msg);
       return 1;
     }
-    free(msg);
     return 0;
   }
 
