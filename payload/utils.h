@@ -4,7 +4,7 @@
 namespace utils {
   void fireHax0r(){
     MessageBox(
-        GetDesktopWindow(),
+        GetForegroundWindow(),
         "Hacking la vida loca",
         "HAX0R",
         MB_ICONWARNING | MB_OK
