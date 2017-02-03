@@ -74,12 +74,11 @@ namespace net {
     return 0;
   }
 
-  void close(SOCKET * s) {
-    closesocket(*s);
+  void close() {
     WSACleanup();
   }
 
-  void listen(SOCKET * s, char * buf, int * buffc) {
+  void listen(SOCKET *s, BOOL *run, void (*handle)(char*, BOOL*, BOOL*)) {
     BOOL listening = TRUE;
     do {
       int bc = 0;
@@ -87,14 +86,12 @@ namespace net {
       bc = recv(*s, buff, BUFFER_LENGTH, 0);
       if (bc > 0 ) {
         printf("Bytes received: %d  _  %s\n", bc, buff);
-        if (strcmp(buff, "close") == 0) {
-          listening = FALSE;
-        }
+        handle(buff, &listening, run);
       } else if ( bc == 0 ) {
         printf("Connection closed\n");
+        listening = FALSE;
       } else {
         printf("peer disconnected: %d\n", WSAGetLastError());
-        close(s);
         listening = FALSE;
       }
     } while(listening);
@@ -108,7 +105,8 @@ namespace net {
       write(&sock, pck);
       free(pck);
     }
-    close(&sock);
+    closesocket(sock);
+    close();
   }
 }
 

