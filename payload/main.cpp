@@ -4,7 +4,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#define ADDRESS "192.168.1.37"
+#define ADDRESS "127.0.0.1"
+// #define ADDRESS "192.168.1.37"
 #define PORT 1337
 
 #include <winsock2.h>
@@ -76,9 +77,9 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     struct fs::s_folder folder;
     fs::ls(&folder, (char*)args.c_str());
 
-    char msg[BUFFER_LENGTH];
-    sprintf(msg, "{\"ls\": %s}", serialize(&folder));
-    net::write(&sock, msg);
+    std::string msg;
+    msg += "{\"ls\": " + fs::serialize(&folder) + "}";
+    net::write(&sock, (char*)msg.c_str());
   }
 }
 

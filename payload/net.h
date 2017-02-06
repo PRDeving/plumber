@@ -1,7 +1,7 @@
 #ifndef H_SOCKET
 #define H_SOCKET
 
-#define BUFFER_LENGTH 1024
+#define BUFFER_LENGTH MAX_PATH
 
 namespace net {
 
@@ -44,9 +44,12 @@ namespace net {
   }
 
   int write(SOCKET *s, char *msg) {
-    char buffer[1024];
-    sprintf(buffer, "%d~~%s||", G_UID, msg);
-    if(send(*s, buffer, strlen(buffer), 0) < 0) {
+    std::string buffer;
+    buffer += G_UID;
+    buffer += "~~";
+    buffer += msg;
+    buffer += "||";
+    if(send(*s, buffer.c_str(), buffer.length(), 0) < 0) {
       return 1;
     }
     return 0;

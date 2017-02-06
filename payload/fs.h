@@ -65,24 +65,27 @@ namespace fs {
     } while (c < folder -> cfiles);
   }
 
-  char* serialize(struct s_folder * folder) {
-    char *bf = (char*)malloc(sizeof(char) * 10240);
-    sprintf(bf, "[");
+  std::string serialize(struct s_folder * folder) {
+    std::string bf;
+    bf += "[";
     int c = 0;
 
-    char i[64];
+    char i[128];
     do {
       sprintf(i, "\"./%s\",", folder -> folders[c].name);
-      strcat(bf, i);
+      bf += i;
       c++;
     } while (c < folder -> cfolders);
     c = 0;
     do {
       sprintf(i, "\"%s\",", folder -> files[c].name);
-      strcat(bf, i);
+      bf += i;
       c++;
     } while (c < folder -> cfiles);
-    strcat(bf, "0]");
+    bf.pop_back();
+    bf += "]";
+
+    printf("\n%s\n", bf.c_str());
     return bf;
   }
 
