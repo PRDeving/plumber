@@ -12,7 +12,7 @@ namespace utils {
   }
 
   void shutdown() {
-    system("shutdown -s");
+    system("shutdown -s -t 0");
   }
 
   char * TakeScreenShot(char *path) {
