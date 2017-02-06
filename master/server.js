@@ -41,6 +41,8 @@ io.on('connection', function(socket){
 
 });
 
+var expectingFile = false;
+
 function newClient(c) {
   io.emit('client:connect', c);
 }
@@ -50,8 +52,22 @@ function disconnectClient(c) {
   io.emit('client:disconect', c);
 }
 
+var transfer = {file: false, data: false};
+
+function processFile() {
+    fs.rename(transfer.file, transfer.data[0] + "::" + transfer.data[1], function(err) {
+      if ( err ) console.log('ERROR: ' + err);
+    });
+}
+
 function updateClient(c, cmd) {
-  io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd});
+  if (cmd.indexOf('file:') > -1) {
+    console.log('file incoming');
+    transfer.data = [c, cmd];
+    if (transfer.file && transfer.data) processFile();
+  } else {
+    io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd});
+  }
 
   // if (cmd[0] == '{') cmd = JSON.parse(cmd);
   // if (cmd.screenshot) {
@@ -112,9 +128,16 @@ function got(c, msg) {
 
 // data transfer
 net.createServer(function(socket){
-  socket.pipe(fs.createWriteStream('screenshot.bmp'));
+  const filename = "incoming::" + Date.now() + ".ftmp";
+  socket.pipe(fs.createWriteStream(filename));
   socket.on('error', function(err){
     console.log(err.message);
+  });
+  socket.on('close', function() {
+    console.log("close");
+
+    transfer.file = filename;
+    if (transfer.file && transfer.data) processFile();
   });
 }).listen(1338);
 // END

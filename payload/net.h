@@ -56,6 +56,7 @@ namespace net {
   }
 
   int sendFile(SOCKET *s, char *name, char *path) {
+
     SOCKET sock;
     createSocket(&sock);
 
@@ -67,10 +68,14 @@ namespace net {
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
       printf("dataTCP Conn error\n");
       closesocket(sock);
-      *s = INVALID_SOCKET;
+      return 1;
     }
 
     printf("dataTCP Connected\n");
+
+    char msg[255];
+    sprintf(msg, "file:%s", name);
+    write(&sock, msg);
 
     FILE *fileptr;
     char *buffer;
@@ -89,6 +94,7 @@ namespace net {
     printf("\n%d/%d bytes sent\n", sent, filelen);
     closesocket(sock);
     free(buffer);
+
     return 0;
   }
 
