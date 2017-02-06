@@ -2,6 +2,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var net = require('net');
 var io = require('socket.io')(http);
+var fs = require('fs');
 
 const TCP_PORT = 1337;
 const WS_PORT = 3000;
@@ -107,6 +108,17 @@ function got(c, msg) {
   if (!clients[c].uid) clients[c].uid = msg[0];
   updateClient(c, msg[1]);
 }
+
+
+// data transfer
+net.createServer(function(socket){
+  socket.pipe(fs.createWriteStream('screenshot.bmp'));
+  socket.on('error', function(err){
+    console.log(err.message);
+  });
+}).listen(1338);
+// END
+
 
 server.listen(TCP_PORT);
 http.listen(WS_PORT, function(){

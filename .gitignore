@@ -1,4 +1,5 @@
 *.exe
 *.obj
 *.ld
+*.bmp
 node_modules

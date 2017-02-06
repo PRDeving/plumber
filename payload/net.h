@@ -55,6 +55,43 @@ namespace net {
     return 0;
   }
 
+  int sendFile(SOCKET *s, char *name, char *path) {
+    SOCKET sock;
+    createSocket(&sock);
+
+    struct sockaddr_in server;
+    server.sin_addr.s_addr = inet_addr(ADDRESS);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(1338);
+
+    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
+      printf("dataTCP Conn error\n");
+      closesocket(sock);
+      *s = INVALID_SOCKET;
+    }
+
+    printf("dataTCP Connected\n");
+
+    FILE *fileptr;
+    char *buffer;
+    long filelen;
+
+    fileptr = fopen(path, "rb");
+    fseek(fileptr, 0, SEEK_END); 
+    filelen = ftell(fileptr);
+    rewind(fileptr);
+
+    buffer = (char *)malloc((filelen + 1) * sizeof(char));
+    fread(buffer, filelen, 1, fileptr);
+    fclose(fileptr);
+
+    int sent = send(sock, buffer, filelen, 0);
+    printf("\n%d/%d bytes sent\n", sent, filelen);
+    closesocket(sock);
+    free(buffer);
+    return 0;
+  }
+
   void close() {
     WSACleanup();
   }
