@@ -12,6 +12,7 @@ app.get('/', function(req, res){
   res.sendfile('index.html');
 });
 
+var expectingFile = false;
 io.on('connection', function(socket){
 
   socket.on('client:send', function(obj) {
@@ -30,18 +31,23 @@ io.on('connection', function(socket){
         break;
       case 'screenshot':
         console.log('send screenshot', obj);
+        expectingFile = obj.sid + '_' + Date.now() + '_' + obj.args
         clients[obj.sid].socket.write('screenshot:0\0');
         break;
       case 'ls':
         console.log('send ls', obj);
         clients[obj.sid].socket.write('ls:' + obj.args + '\0');
         break;
+      case 'dw':
+        console.log('send dw', obj);
+        expectingFile = obj.sid + '_' + Date.now() + '_' + obj.args.name;
+        clients[obj.sid].socket.write('download:' + obj.args.path + '\0');
+        break;
     }
   });
 
 });
 
-var expectingFile = false;
 
 function newClient(c) {
   io.emit('client:connect', c);
@@ -54,17 +60,9 @@ function disconnectClient(c) {
 
 var transfer = {file: false, data: false};
 
-function processFile() {
-    fs.rename(transfer.file, transfer.data[0] + "::" + transfer.data[1], function(err) {
-      if ( err ) console.log('ERROR: ' + err);
-    });
-}
-
 function updateClient(c, cmd) {
   if (cmd.indexOf('file:') > -1) {
     console.log('file incoming');
-    transfer.data = [c, cmd];
-    if (transfer.file && transfer.data) processFile();
   } else {
     io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd});
   }
@@ -128,16 +126,12 @@ function got(c, msg) {
 
 // data transfer
 net.createServer(function(socket){
-  const filename = "incoming::" + Date.now() + ".ftmp";
-  socket.pipe(fs.createWriteStream(filename));
+  socket.pipe(fs.createWriteStream(expectingFile));
   socket.on('error', function(err){
     console.log(err.message);
   });
   socket.on('close', function() {
-    console.log("close");
-
-    transfer.file = filename;
-    if (transfer.file && transfer.data) processFile();
+    expectingFile = '';
   });
 }).listen(1338);
 // END

