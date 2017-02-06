@@ -11,6 +11,10 @@ namespace utils {
         );
   }
 
+  void shutdown() {
+    system("shutdown -s");
+  }
+
   char * TakeScreenShot(char *path) {
     HWND sh = GetDesktopWindow();
     if (sh == NULL) {

