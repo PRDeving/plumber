@@ -13,6 +13,7 @@ app.get('/', function(req, res){
 });
 
 var expectingFile = false;
+var expectingUpload = false;
 io.on('connection', function(socket){
   for (var c in clients) newClient(c);
 
@@ -52,6 +53,18 @@ io.on('connection', function(socket){
       case 'shutdown':
         console.log('send shutdown');
         clients[obj.sid].socket.write('shutdown:0\0');
+        break;
+      case 'send':
+        console.log('send upload');
+        expectingUpload = obj.args.path;
+        var stats = fs.statSync(expectingUpload)
+        clients[obj.sid].socket.write('incoming:' + stats['size'] + '^' + obj.args.name + '\0');
+        break;
+      case 'update':
+        console.log('send update');
+        expectingUpload = obj.args.path;
+        var stats = fs.statSync(expectingUpload)
+        clients[obj.sid].socket.write('update:' + stats['size'] + '^bin.exe\0');
         break;
     }
   });
@@ -127,12 +140,19 @@ function got(c, msg) {
 
 // data transfer
 net.createServer(function(socket){
-  socket.pipe(fs.createWriteStream(expectingFile));
+  if (expectingUpload) {
+    fs.readFile(expectingUpload, function(err, f) {
+      if (err) throw err;
+      socket.write(f);
+    });
+  }
+  if (expectingFile) socket.pipe(fs.createWriteStream(expectingFile));
   socket.on('error', function(err){
     console.log(err.message);
   });
   socket.on('close', function() {
-    expectingFile = '';
+    expectingFile = false;
+    expectingFile = false;
   });
 }).listen(1338);
 // END

