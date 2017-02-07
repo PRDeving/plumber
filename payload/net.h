@@ -45,7 +45,7 @@ namespace net {
 
   int write(SOCKET *s, char *msg) {
     std::string buffer;
-    buffer += G_UID;
+    buffer += std::to_string(G_UID);
     buffer += "~~";
     buffer += msg;
     buffer += "||";

