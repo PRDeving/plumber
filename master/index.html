@@ -135,7 +135,7 @@
 
     function sendUpdate(cl) {
       console.log('update', cl);
-      socket.emit('client:send', {sid: cl, cmd: 'update', args: {path: 'bin.exe'}});
+      socket.emit('client:send', {sid: cl, cmd: 'update', args: {path: 'bin.exe', name: prompt('name')}});
     }
 
 

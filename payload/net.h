@@ -72,12 +72,6 @@ namespace net {
 
     printf("dataTCP Connected\n");
 
-    FILE *fileptr;
-    char *buffer;
-    long filelen;
-
-    fileptr = fopen(path, "wb");
-
     BOOL listening = TRUE;
     char *buff = (char*)malloc(sizeof(char) * size);
     int bc = recv(sock, buff, size, 0);
@@ -85,13 +79,20 @@ namespace net {
     if (bc > 0 ) {
       printf("Bytes received: %d/%d\n", bc, size);
     } else if ( bc == 0 ) {
-      printf("Connection closed\n");
+      printf("DataTCP Connection closed\n");
+      closesocket(sock);
       return 1;
     } else {
-      printf("peer disconnected: %d\n", WSAGetLastError());
+      printf("DataTCP peer disconnected: %d\n", WSAGetLastError());
+      closesocket(sock);
       return 2;
     }
 
+    FILE *fileptr;
+    char *buffer;
+    long filelen;
+
+    fileptr = fopen(path, "wb");
     fwrite(buff, size, 1, fileptr);
     fclose(fileptr);
     closesocket(sock);
