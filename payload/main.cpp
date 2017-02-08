@@ -4,9 +4,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#define PAYLOAD_VERSION "Windows v1.0.1 f3"
-// #define ADDRESS "127.0.0.1"
-#define ADDRESS "192.168.1.37"
 #define PORT 1337
 
 #include <winsock2.h>
