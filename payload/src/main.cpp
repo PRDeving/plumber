@@ -128,6 +128,7 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 }
 
 int main() {
+  printf("\nconnecting to %s:%d\n", ADDRESS, PORT);
   // FreeConsole();
   G_UID = fingerprint::getUID();
 
