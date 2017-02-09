@@ -25,9 +25,33 @@ namespace net {
     return 0;
   }
 
+  ULONG resolveHost(char *hostname) {
+    struct hostent *host = gethostbyname(hostname);
+    if (host == NULL) {
+        switch (h_errno) {
+            case HOST_NOT_FOUND:
+                fputs ("The host was not found.\n", stderr);
+                break;
+            case NO_ADDRESS:
+                fputs ("The name is valid but it has no address.\n", stderr);
+                break;
+            case NO_RECOVERY:
+                fputs ("A non-recoverable name server error occurred.\n", stderr);
+                break;
+            case TRY_AGAIN:
+                fputs ("The name server is temporarily unavailable.", stderr);
+                break;
+        }
+        return -1;
+    } else {
+        return inet_addr(inet_ntoa(*((struct in_addr *) host->h_addr_list[0])));
+    }
+  }
+
   int connect(SOCKET * s) {
     struct sockaddr_in server;
     server.sin_addr.s_addr = inet_addr(ADDRESS);
+    // server.sin_addr.s_addr = resolveHost(ADDRESS);
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
 
