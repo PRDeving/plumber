@@ -192,7 +192,8 @@
     function send(cl, dest) {
       console.log('send', cl);
       selectFileFromMaster(function(name) {
-        socket.emit('client:send', {sid: cl, cmd: 'send', args: {path: './uploads/' + name, name: dest || name}});
+        socket.emit('client:send', {sid: cl, cmd: 'send', args: {path: './uploads/' + name, name: (dest || 'C://') + name}});
+        ls(cl, currPath);
       });
     }
 
@@ -220,7 +221,12 @@
       const $tree = $('#tree');
       $tree.empty();
       $tree.data('client', c);
-      $tree.append($('<div><button onclick="clearTree()">Close</button>' + currPath + '</div>'));
+      $tree.append($(`
+        <div>
+          <button onclick="clearTree()">Close</button>
+          <button onclick="send(${c}, '${currPath}/')">send here</button>
+          ${currPath}
+        </div>`));
       for (var i in f) {
         const x = f[i].replace('./', '');
         if (!x.length || x == '.') continue;
