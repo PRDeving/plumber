@@ -2,6 +2,8 @@ var app = require('express')();
 var http = require('http').Server(app);
 var net = require('net');
 var io = require('socket.io')(http);
+var formidable = require('formidable');
+var pth = require('path');
 var fs = require('fs');
 
 const TCP_PORT = 1337;
@@ -12,10 +14,31 @@ app.get('/', function(req, res){
   res.sendfile('index.html');
 });
 
+app.post('/upload', function(req, res) {
+  var f;
+  var form = new formidable.IncomingForm();
+  form.multiples = true;
+  form.uploadDir = './uploads';
+  form.on('file', function(field, file) {
+    f = file;
+    fs.rename(file.path, pth.join(form.uploadDir, file.name));
+  });
+  form.on('end', function() {
+    io.emit('file:uploaded', f);
+  });
+  form.parse(req);
+});
+
 var expectingFile = false;
 var expectingUpload = false;
 io.on('connection', function(socket){
   for (var c in clients) newClient(c);
+
+  socket.on('server:getuploads', function() {
+    fs.readdir('./uploads', (err, files) => {
+      socket.emit('master:listuploads', files);
+    });
+  });
 
   socket.on('client:send', function(obj) {
     switch (obj.cmd) {
