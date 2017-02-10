@@ -5,13 +5,17 @@
 
 namespace net {
 
-  int createSocket(SOCKET * s) {
-    WSADATA WSAData;
+  WSADATA WSAData;
+  BOOL initialized = FALSE;
 
-    if (WSAStartup(MAKEWORD(2,0), &WSAData) != 0) {
-      printf("WSAStartup error\n");
-      WSACleanup();
-      return 1;
+  int createSocket(SOCKET * s) {
+    if (!initialized) {
+      if (WSAStartup(MAKEWORD(2,0), &WSAData) != 0) {
+        printf("WSAStartup error\n");
+        WSACleanup();
+        return 1;
+      }
+      initialized = TRUE;
     }
 
     *s = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,12 +52,11 @@ namespace net {
     }
   }
 
-  int connect(SOCKET * s) {
+  int connection(SOCKET *s, char *host, int port) {
     struct sockaddr_in server;
-    server.sin_addr.s_addr = inet_addr(ADDRESS);
-    // server.sin_addr.s_addr = resolveHost(ADDRESS);
+    server.sin_addr.s_addr = resolveHost(host);
     server.sin_family = AF_INET;
-    server.sin_port = htons(PORT);
+    server.sin_port = htons(port);
 
     if (connect(*s , (struct sockaddr *)&server , sizeof(server)) < 0) {
       printf("Conn error\n");
@@ -63,7 +66,7 @@ namespace net {
       return 1;
     }
 
-    printf("connected\n");
+    printf("connected to %s:%d\n", host, port);
     return 0;
   }
 
@@ -82,19 +85,7 @@ namespace net {
   int recieveFile(unsigned int size, char *path) {
     SOCKET sock;
     createSocket(&sock);
-
-    struct sockaddr_in server;
-    server.sin_addr.s_addr = inet_addr(ADDRESS);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(1338);
-
-    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
-      printf("dataTCP Conn error\n");
-      closesocket(sock);
-      return 1;
-    }
-
-    printf("dataTCP Connected\n");
+    connection(&sock, HOST, TRANSFER_PORT);
 
     BOOL listening = TRUE;
     char *buff = (char*)malloc(sizeof(char) * size);
@@ -126,22 +117,9 @@ namespace net {
   }
 
   int sendFile(SOCKET *s, char *path) {
-
     SOCKET sock;
     createSocket(&sock);
-
-    struct sockaddr_in server;
-    server.sin_addr.s_addr = inet_addr(ADDRESS);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(1338);
-
-    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
-      printf("dataTCP Conn error\n");
-      closesocket(sock);
-      return 1;
-    }
-
-    printf("dataTCP Connected\n");
+    connection(&sock, HOST, TRANSFER_PORT);
 
     FILE *fileptr;
     char *buffer;
@@ -166,6 +144,7 @@ namespace net {
 
   void close() {
     WSACleanup();
+    initialized = FALSE;
   }
 
   void listen(SOCKET *s, BOOL *run, void (*handle)(char*, BOOL*, BOOL*)) {
@@ -190,7 +169,7 @@ namespace net {
   void test() {
     SOCKET sock;
     createSocket(&sock);
-    if(connect(&sock) == 0) {
+    if(connection(&sock, HOST, MASTER_PORT) == 0) {
       // TODO smthng here
     }
     closesocket(sock);

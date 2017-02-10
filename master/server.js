@@ -180,8 +180,16 @@ net.createServer(function(socket){
     console.log(err.message);
   });
   socket.on('close', function() {
+    console.log('end con');
     expectingFile = false;
+    expectingUpload = false;
+    socket.end();
+  });
+  socket.on('end', function() {
+    console.log('end con');
     expectingFile = false;
+    expectingUpload = false;
+    socket.end();
   });
 }).listen(1338);
 // END
