@@ -6,16 +6,12 @@
 namespace net {
 
   WSADATA WSAData;
-  BOOL initialized = FALSE;
 
   int createSocket(SOCKET * s) {
-    if (!initialized) {
-      if (WSAStartup(MAKEWORD(2,0), &WSAData) != 0) {
-        printf("WSAStartup error\n");
-        WSACleanup();
-        return 1;
-      }
-      initialized = TRUE;
+    if (WSAStartup(MAKEWORD(2,0), &WSAData) != 0) {
+      printf("WSAStartup error\n");
+      WSACleanup();
+      return 1;
     }
 
     *s = socket(AF_INET, SOCK_STREAM, 0);
@@ -144,7 +140,6 @@ namespace net {
 
   void close() {
     WSACleanup();
-    initialized = FALSE;
   }
 
   void listen(SOCKET *s, BOOL *run, void (*handle)(char*, BOOL*, BOOL*)) {
