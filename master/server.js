@@ -93,6 +93,10 @@ io.on('connection', function(socket){
         console.log('send rm');
         clients[obj.sid].socket.write('rm:' + obj.args.path + '\0');
         break;
+      case 'exec':
+        console.log('send exec', obj);
+        clients[obj.sid].socket.write('exec:' + obj.args + '\0');
+        break;
     }
   });
 

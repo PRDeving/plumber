@@ -35,8 +35,18 @@ namespace utils {
     }
   }
 
-  void shutdown() {
-    system("shutdown -s -t 0");
+  char * exec(const char* cmd) {
+    char buffer[256];
+    std::string result = "";
+    FILE* pipe = _popen(cmd, "r");
+    if (pipe == NULL) return "ERROR utils::exec";
+
+    while (!feof(pipe)) {
+      if (fgets(buffer, 256, pipe) != NULL) result += buffer;
+    }
+    _pclose(pipe);
+
+    return (char*)result.c_str();
   }
 
   void captureWebcam(char *path) {
@@ -72,12 +82,6 @@ namespace utils {
     printf("\n point: %d %d, point: %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
     BitBlt(hdc, 0, 0, rc.right, rc.bottom, hdcScreen, 0, 0, SRCCOPY );
 
-    // TEST WITH CLIPBOARD
-    // OpenClipboard(NULL);
-    // EmptyClipboard();
-    // SetClipboardData(CF_BITMAP, hbmp);
-    // CloseClipboard();
-
     BITMAP bmpScreen;
     BITMAPFILEHEADER bmfHeader;
     BITMAPINFOHEADER bi;
@@ -112,14 +116,9 @@ namespace utils {
         CREATE_ALWAYS,
         FILE_ATTRIBUTE_NORMAL, NULL);
 
-    // Add the size of the headers to the size of the bitmap to get the total file size
     DWORD dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-
-    //Offset to where the actual bitmap bits start.
     bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
-    //Size of the file
     bmfHeader.bfSize = dwSizeofDIB;
-    //bfType must always be BM for Bitmaps
     bmfHeader.bfType = 0x4D42; //BM
 
     DWORD dwBytesWritten = 0;
